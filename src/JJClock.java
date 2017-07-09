@@ -16,91 +16,94 @@
    synchronized with another thread, by calling periodically the tick() function
    instead of starting the JJClock object.
 
-*/
+ */
 
 public class JJClock extends Thread {
 
-// constants
-// these are perfomance tuning paramters
- private static final int IT_MSEC = 20;
- private static final int MULT = 1;
+	// constants
+	// these are perfomance tuning paramters
+	private static final int IT_MSEC = 20;
+	private static final int MULT = 1;
 
-// private fields
- private long[] currentTime;
- private double resolution;
+	// private fields
+	private long[] currentTime;
+	private double resolution;
 
-// constructor
- public JJClock() {
-  super("JJClock");
-  currentTime = new long[1];
- }
+	// constructor
+	public JJClock() {
+		super("JJClock");
+		currentTime = new long[1];
+	}
 
-// private methods
- private void benchmark(){
-// this function does nothing but generating a machine dependent delay
-// here i used a rectangular to polar conversion function, i think every
-// robot uses something like this
-  double alpha;
-  double x;
-  double y;
-  double a;
-  double b;
-  int i;
-  x = 10*Math.random();
-  y = 10*Math.random();
-  a = 10*Math.random();
-  b = 10*Math.random();
-  if ((x == 0)&&(y > 0))
-   alpha = 90;
-  else if ((x == 0)&&(y <= 0))
-   alpha = 180;
-  else {
-   alpha = Math.atan(y/x)*Math.PI; // slow fpu function
-   if (x < 0)
-    alpha += 180;
-  }
-  for (i=0; i<100; i++){
-   x += a; // these 2 line are just to test peak fpu performance
-   y *= b; // add and mul without data dependency
-  }
- }
- private void loopStep(){
-  for (int i=0; i<IT_MSEC; i++)
-   benchmark();
-  synchronized (currentTime){
-   currentTime[0] += MULT;
-  }
-  Thread.yield();
- }
+	// private methods
+	private void benchmark() {
+		// this function does nothing but generating a machine dependent delay
+		// here i used a rectangular to polar conversion function, i think every
+		// robot uses something like this
+		double alpha;
+		double x;
+		double y;
+		double a;
+		double b;
+		int i;
+		x = 10*Math.random();
+		y = 10*Math.random();
+		a = 10*Math.random();
+		b = 10*Math.random();
+		if ((x == 0)&&(y > 0))
+			alpha = 90;
+		else if ((x == 0)&&(y <= 0))
+			alpha = 180;
+		else {
+			alpha = Math.atan(y/x)*Math.PI; // slow fpu function
+			if (x < 0)
+				alpha += 180;
+		}
+		for (i=0; i<100; i++) {
+			x += a; // these 2 line are just to test peak fpu performance
+			y *= b; // add and mul without data dependency
+		}
+	}
+	
+	private void loopStep() {
+		for (int i=0; i<IT_MSEC; i++)
+			benchmark();
+		synchronized (currentTime) {
+			currentTime[0] += MULT;
+		}
+		Thread.yield();
+	}
 
-// set&get methods
- public void setResolution (double secondsPerTick) {
-  resolution = secondsPerTick;
- }
- public double getResolution () {
-  return resolution;
- }
+	// set&get methods
+	public void setResolution (double secondsPerTick) {
+		resolution = secondsPerTick;
+	}
+	public double getResolution () {
+		return resolution;
+	}
 
-// methods
- public double currentTimeSelectedRes(){
-  return resolution*currentTimeMillis();
- }
- public long currentTimeMillis(){
-  synchronized (currentTime){ //thread safe!
-   return currentTime[0];
-  }
- }
+	// methods
+	public double currentTimeSelectedRes(){
+		return resolution*currentTimeMillis();
+	}
+	
+	public long currentTimeMillis(){
+		synchronized (currentTime){ //thread safe!
+			return currentTime[0];
+		}
+	}
 
-// running functions
-// Asynchronous clock generator
- public void run(){
-  Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
-  while (true)
-   loopStep();
- }
-// Synchronous clock generator
- public void tick(){
-  if (!this.isAlive())
-   loopStep();
- }
+	// running functions
+	// Asynchronous clock generator
+	public void run(){
+		Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
+		while (true)
+			loopStep();
+	}
+	
+	// Synchronous clock generator
+	public void tick(){
+		if (!this.isAlive())
+			loopStep();
+	}
 }
