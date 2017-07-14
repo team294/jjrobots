@@ -359,48 +359,88 @@ implements Runnable, AppletStub
 	}
 
 	private void readResults() {
-		try {
-			readTime = System.currentTimeMillis();
-			Vector lines = new Vector();
-			String line;
+		boolean bResultsFound;
+		DataInputStream dis;
+		
+		readTime = System.currentTimeMillis();
+		Vector lines = new Vector();
+		String line;
 
+		// Try to load the results file "bin/robots.txt"
+		try {
 			URLConnection c = new URL(getCodeBase(),"robots.txt").openConnection();
+
+
 			c.setUseCaches(false);
-			DataInputStream dis = new DataInputStream(c.getInputStream());
+			dis = new DataInputStream(c.getInputStream());
 			if((line = dis.readLine()) != null) {
 				while((line = dis.readLine()) != null) lines.addElement(line);
 			}
-			int count = lines.size();
-			jn = new String[count];
-			id = new int[count];
-			wins = new int[count][];
-			matches = new int[count][];
-			perc = new float[count][];
-			graph = new String[count][];
-			for(int ct = 0; ct < count; ct++) {
-				StringTokenizer st = new StringTokenizer((String)lines.elementAt(ct));
-				jn[ct] = st.nextToken();
-				id[ct] = ct;
-				wins[ct] = new int[3];
-				matches[ct] = new int[3];
-				perc[ct] = new float[3];
-				for(int ct1 = 0; ct1 < 3; ct1++) {
-					wins[ct][ct1] = Integer.parseInt(st.nextToken());
-					matches[ct][ct1] = Integer.parseInt(st.nextToken());
-					perc[ct][ct1] = matches[ct][ct1] != 0? wins[ct][ct1]*100f/matches[ct][ct1]: 0;
-				}
-				if(graph[ct] == null) {
-					graph[ct] = new String[3];
-					for (int i = 0; i < 3; i++) {
-						try { graph[ct][i] = st.nextToken(); } catch(Exception e) { graph[ct][i] = "x"; }
-						graph[ct][i] = graph[ct][i].substring(1);
-					}
+			dis.close();
+
+			bResultsFound = true;
+		} catch(Exception e) {
+//			e.printStackTrace();
+			bResultsFound = false;
+		}
+
+		if (!bResultsFound) {
+			// Results file not found, so load all robots in directory matching "__*_.class"
+			File[] filesInBase = null;
+
+			try {
+//				System.out.println("CodeBase = " + getCodeBase().toURI() );
+
+				File dirBase = new File(getCodeBase().toURI());		// Works better than getCodeBase().getPath()
+				System.out.println("Loading all robots in " + dirBase.getCanonicalPath());
+
+				filesInBase = dirBase.listFiles();
+			} catch(Exception e) {
+				System.out.println("Error reading directory with __robotname_.class files.");
+				e.printStackTrace();
+			}
+
+//			System.out.println("Num files = " + filesInBase.length);
+			for (int i=0; i<filesInBase.length; i++) {
+				line = filesInBase[i].getName();
+				
+				if (line.matches("^__.+_.class$")) {
+					System.out.println("Found " + line);
+					line = line.substring(0, line.length()-6) + " 0 0 0 0 0 0";
+					lines.addElement(line);
 				}
 			}
-			dis.close();
-		} catch(Exception e) {
-			e.printStackTrace();
 		}
+
+		// Load list of robots
+		int count = lines.size();
+		jn = new String[count];
+		id = new int[count];
+		wins = new int[count][];
+		matches = new int[count][];
+		perc = new float[count][];
+		graph = new String[count][];
+		for(int ct = 0; ct < count; ct++) {
+			StringTokenizer st = new StringTokenizer((String)lines.elementAt(ct));
+			jn[ct] = st.nextToken();
+			id[ct] = ct;
+			wins[ct] = new int[3];
+			matches[ct] = new int[3];
+			perc[ct] = new float[3];
+			for(int ct1 = 0; ct1 < 3; ct1++) {
+				wins[ct][ct1] = Integer.parseInt(st.nextToken());
+				matches[ct][ct1] = Integer.parseInt(st.nextToken());
+				perc[ct][ct1] = matches[ct][ct1] != 0? wins[ct][ct1]*100f/matches[ct][ct1]: 0;
+			}
+			if(graph[ct] == null) {
+				graph[ct] = new String[3];
+				for (int i = 0; i < 3; i++) {
+					try { graph[ct][i] = st.nextToken(); } catch(Exception e) { graph[ct][i] = "x"; }
+					graph[ct][i] = graph[ct][i].substring(1);
+				}
+			}
+		}
+	
 	}
 
 	private void readCombats() {
