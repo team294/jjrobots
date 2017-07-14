@@ -1,5 +1,5 @@
 /*
-  JJArena.java version 4.00 alfa (2003/10/19)
+  JJArena.java version 4.2 alpha (2003/10/19)
     Copyright (C) 2001-2003 Leonardo Boselli (boselli@uno.it)
 
   Portions of this program were written by:
@@ -40,6 +40,8 @@
 // Mouse interupts do not take CPU power from simulator
 // To stop match click stop button first
 
+// Updates by Beach Cities Robotics:  (version 4.2.1)
+// If robot.txt save file is not found, it automatically loads all robot class files in the bin directory.
 
 import java.applet.*;
 import java.awt.*;
