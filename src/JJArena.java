@@ -370,8 +370,9 @@ implements Runnable, AppletStub
 
 		// Try to load the results file "bin/robots.txt"
 		try {
-			URLConnection c = new URL(getCodeBase(),"robots.txt").openConnection();
+//			System.out.println("CodeBase = " + getCodeBase() );
 
+			URLConnection c = new URL(getCodeBase(),"robots.txt").openConnection();
 
 			c.setUseCaches(false);
 			dis = new DataInputStream(c.getInputStream());
@@ -380,20 +381,25 @@ implements Runnable, AppletStub
 			}
 			dis.close();
 
+			System.out.println("Robots and results loaded from " + c.getURL().getPath() );
 			bResultsFound = true;
 		} catch(Exception e) {
-//			e.printStackTrace();
 			bResultsFound = false;
 		}
 
 		if (!bResultsFound) {
 			// Results file not found, so load all robots in directory matching "__*_.class"
 			File[] filesInBase = null;
-
+			File dirBase = null;
+			
 			try {
-//				System.out.println("CodeBase = " + getCodeBase().toURI() );
-
-				File dirBase = new File(getCodeBase().toURI());		// Works better than getCodeBase().getPath()
+//				System.out.println("CodeBase = " + getCodeBase().getPath() );
+				if (isApplication) {
+					dirBase = new File(getCodeBase().getPath());
+					dirBase = new File(dirBase.getCanonicalPath() + "\\bin");					
+				} else {
+					dirBase = new File(getCodeBase().toURI());					
+				}
 				System.out.println("Loading all robots in " + dirBase.getCanonicalPath());
 
 				filesInBase = dirBase.listFiles();

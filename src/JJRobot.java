@@ -71,42 +71,95 @@ abstract public class JJRobot implements Runnable {
 		return id;
 	}
 
+	/**
+	 * If there are n robots in the team, this number goes from 0, the first robot created, to n-1, the last one.
+	 * This function is available to distinguish between robots in team and double matches. 
+	 * @return The identification number of this robot in the team
+	 */
 	final protected int id() {
 		return jjRobots.id(this);
 	}
 
+	/**
+	 * Returns the number of team mates that started this match:
+	 * gives 1 for SINGLE, 2 for DOUBLE, 8 for TEAM.  Note that it doesn't report the number of mates still active (!)
+	 * @return
+	 */
 	final protected int getFriendsCount() {
 		return jjRobots.getFriendsCount();
 	}
 
+	/**
+	 * The elapsed "game-time" seconds since the beginning of the fight 
+	 * @return
+	 */
 	final protected double time() {
 		return jjRobots.time();
 	}
 
+	/**
+	 * Scans for nearest robot in a specific direction.  It scans the battlefield with a resolution from 1 to 20 degrees. 
+	 * Scanning the battlefield, the robot receives the distance of the nearest robot (both friend or enemy) or zero if there is no one in that sector.
+	 * @param degree is the direction in degrees of the scan (angles start from 3 o'clock and increase clockwise). 
+	 * @param resolution is the width of the scan in degrees (scan start degrees-resolution/2 to degrees+resolution/2). Its value must be greater than 0 and lesser than 21 degrees. 
+	 * @return the distance of the nearest robot found in the scanned region, or zero if no robot was found.
+	 */
 	final protected int scan(int degree, int resolution) {
 		return jjRobots.scan(this,degree,resolution);
 	}
 
+	/**
+	 * Shoots the cannon.  The robot can point the cannon all around and can fire all the missiles it wants, but there is a reload time of 1 second. 
+	 * Missiles have a range of 700 meters and a speed of 300 m/s. The speed of the missile is independent from the speed of the robot,
+	 * so it's always 300 m/s. When a missile explodes, it gives damage points to all the robots nearby. Damage points depend on the distance 
+	 * of the robot from the explosion (5 meters = 10 damage points, 20 meters = 5 damage points, 40 meters = 3 damage points).  
+	 * If a robot fires a missile within a circle of 5 meters radius, it gives itself 10 damage points, so it's better to fire the missiles far away.
+	 * @param degree is the direction in degrees of the shot (angles start from 3 o'clock and increase clockwise)
+	 * @param range is the distance where the missile explodes, in meters
+	 * @return 1 if the missile was fired, 0 if not (due to reload time)
+	 */
 	final protected int cannon(int degree, int range) {
 		return jjRobots.cannon(this,degree,range);
 	}
 
+	/**
+	 * Set direction and speed of the robot movement.  
+	 * <b>Notes</b>:  Robots can change their direction only if the speed is lower than 50% (= 15 m/s).  Acceleration and deceleration are 5 m/s2.
+	 * @param degree is the direction of movement of the robot (angles start from 3 o'clock and increase clockwise).  
+	 * @param speed is the speed in percent that the robot must reach: 0% means 0 m/s, 100% means 30 m/s.
+	 */
 	final protected void drive(int degree, int speed) {
 		jjRobots.drive(this,degree,speed);
 	}
 
+	/**
+	 * Returns the damage points of this robot: 0 to 99 means alive, 100 means dead (the robot will never read this value). 
+	 * @return
+	 */
 	final protected int damage() {
 		return jjRobots.damage(this);
 	}
 
+	/**
+	 * The speed of the robot in percent: 0 means 0 m/s, 100 means 30 m/s.
+	 * @return
+	 */
 	final protected int speed() {
 		return jjRobots.speed(this);
 	}
 
+	/**
+	 * Reads the X location of the robot, in meters
+	 * @return the X coordinate of the robot in the battlefield (the origin is in the upper-left corner and X coordinates increase to the right).
+	 */
 	final protected int loc_x() {
 		return i_rnd(jjRobots.loc_x(this));
 	}
 
+	/**
+	 * Reads the Y location of the robot, in meters
+	 * @return the Y coordinate of the robot in the battlefield (the origin is in the upper-left corner and Y coordinates increase to the bottom).
+	 */
 	final protected int loc_y() {
 		return i_rnd(jjRobots.loc_y(this));
 	}
@@ -159,6 +212,11 @@ abstract public class JJRobot implements Runnable {
 	}
 	// - End additions by alan.lund@acm.org
 
+	/**
+	 * Return a random integer between 0 and (limit-1), inclusive
+	 * @param limit Max value to return (+1)
+	 * @return Random integer
+	 */
 	static protected final int rand(int limit) {
 		return (int)(Math.random()*limit);
 	}
