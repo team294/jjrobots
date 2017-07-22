@@ -312,8 +312,8 @@ abstract public class JJRobot implements Runnable {
 	static protected final double ceil(double value) {
 		return Math.ceil(value);
 	}
-	static protected final double atan2(double x, double y) {
-		return Math.atan2(x,y);
+	static protected final double atan2(double y, double x) {
+		return Math.atan2(y,x);
 	}
 	static protected final double asin(double x) {
 		return Math.asin(x);
